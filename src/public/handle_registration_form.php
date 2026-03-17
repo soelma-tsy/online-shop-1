@@ -16,11 +16,11 @@ if (strlen($name) < 2) {
 }
 
 if (strlen($email) < 3) {
-    $errors[] = 'email должен содержать более 3 символов' . "<br>";
+    $errors[] = 'Email должен содержать более 3 символов' . "<br>";
 }
 
 if (filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-    $errors[] = 'email введен некорректно, пожалуйста, проверьте правильность ввода' . "<br>";
+    $errors[] = 'Email введен некорректно, пожалуйста, проверьте правильность ввода' . "<br>";
 }
 
 if (strlen($password) < 6) {
@@ -37,9 +37,16 @@ if (empty($name) || empty($email) || empty($password)) {
 
 if (empty($errors)) {
     $pdo = new PDO('pgsql:host=db;port=5432;dbname=mydb', 'user', 'pass');
-    $sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+    $sql = "INSERT INTO users (name, email, password) VALUES (:name, :email, :password)";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute([$name, $email, $password]);
+    $stmt->execute([
+        ':name' => $name,
+        ':email' => $email,
+        ':password' => password_hash($password, PASSWORD_DEFAULT)
+    ]);
+
+
+
     echo "<h2>Регистрация прошла успешно! Добро пожаловать, $name!</h2>";
     echo "Ваше имя: " . $name . "<br>";
     echo "Ваш email: " . $email;
@@ -49,9 +56,5 @@ if (empty($errors)) {
         echo $error . "<br>";
     }
 }
-
-
-
-
 
 
